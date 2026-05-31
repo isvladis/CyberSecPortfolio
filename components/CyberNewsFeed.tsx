@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { ExternalLink, Globe, Loader2, X } from "lucide-react";
 import { useDialogFocusTrap } from "@/hooks/useDialogFocusTrap";
@@ -21,19 +21,29 @@ export const CyberNewsFeed = () => {
   const [selectedNews, setSelectedNews] = useState<NewsItem | null>(null);
   const dialogRef = useRef<HTMLDivElement>(null);
   const closeButtonRef = useRef<HTMLButtonElement>(null);
+  const sentinelRef = useRef<HTMLDivElement>(null);
 
-  const visibleItems = useMemo(() => items.slice(0, visibleCount), [items, visibleCount]);
+  const visibleItems = items.slice(0, visibleCount);
   const hasMore = visibleCount < items.length;
 
-  const loadMore = () => setVisibleCount((count) => Math.min(count + NEWS_PAGE_SIZE, items.length));
+  const loadMore = useCallback(() => {
+    setVisibleCount((count) => Math.min(count + NEWS_PAGE_SIZE, items.length));
+  }, [items.length]);
 
-  const openNews = useCallback((item: NewsItem) => {
-    setSelectedNews(item);
-  }, []);
+  useEffect(() => {
+    const sentinel = sentinelRef.current;
+    if (!sentinel || !hasMore) return;
 
-  const closeNews = useCallback(() => {
-    setSelectedNews(null);
-  }, []);
+    const observer = new IntersectionObserver(
+      (entries) => { if (entries[0].isIntersecting) loadMore(); },
+      { threshold: 0.1 },
+    );
+    observer.observe(sentinel);
+    return () => observer.disconnect();
+  }, [hasMore, loadMore]);
+
+  const openNews = useCallback((item: NewsItem) => setSelectedNews(item), []);
+  const closeNews = useCallback(() => setSelectedNews(null), []);
 
   useLockBodyScroll(Boolean(selectedNews));
   useDialogFocusTrap({
@@ -71,9 +81,7 @@ export const CyberNewsFeed = () => {
     };
 
     loadNews();
-    return () => {
-      isMounted = false;
-    };
+    return () => { isMounted = false; };
   }, []);
 
   const modalContent = selectedNews ? (
@@ -110,9 +118,9 @@ export const CyberNewsFeed = () => {
         </div>
 
         <div className="custom-scrollbar flex-1 space-y-6 overflow-y-auto bg-black p-6 md:p-8">
-          <div className="flex flex-wrap items-center gap-3 font-mono text-[10px] uppercase tracking-[0.16em] text-white/70">
-            <span className="border border-accent/50 bg-white/5 px-2 py-1">{selectedNews.source}</span>
-            <time>{new Date(selectedNews.pubDate).toLocaleString("es-ES")}</time>
+          <div className="flex flex-wrap items-center gap-3 font-mono text-[10px] uppercase tracking-[0.16em]">
+            <span className="border border-accent bg-accent/20 px-2 py-1 font-bold text-accent">{selectedNews.source}</span>
+            <time className="text-white/70">{new Date(selectedNews.pubDate).toLocaleString("es-ES")}</time>
           </div>
 
           <h4 className="text-2xl font-black uppercase leading-tight text-white md:text-3xl">{selectedNews.title}</h4>
@@ -120,11 +128,6 @@ export const CyberNewsFeed = () => {
           <p className="border-l-2 border-accent/50 pl-4 font-mono text-sm leading-7 text-gray-200 md:text-base">
             {selectedNews.description}
           </p>
-
-          <div className="rounded border border-yellow-500/30 bg-yellow-500/10 p-4 font-mono text-xs leading-relaxed text-yellow-100">
-            Los medios suelen bloquear iframes con políticas `X-Frame-Options` o `frame-ancestors`; por eso este lector muestra el resumen
-            seguro y enlaza a la fuente original.
-          </div>
         </div>
 
         <div className="flex shrink-0 items-center justify-between border-t border-accent/50 bg-black px-4 py-3 font-mono text-[10px]">
@@ -195,7 +198,7 @@ export const CyberNewsFeed = () => {
 
                   <div className="flex flex-col gap-3">
                     <div className="flex flex-wrap items-center gap-3">
-                      <span className="border border-accent/50 bg-white/5 px-2 py-0.5 text-[10px] font-bold uppercase tracking-normal text-white/80">
+                      <span className="border border-accent bg-accent/20 px-2 py-0.5 text-xs font-bold uppercase tracking-wide text-accent">
                         {item.source}
                       </span>
                       <time className="font-mono text-[11px] italic text-white/45">{new Date(item.pubDate).toLocaleString("es-ES")}</time>
@@ -222,15 +225,11 @@ export const CyberNewsFeed = () => {
                 </article>
               ))}
 
-            {!isLoading && !hasError && hasMore && (
-              <button
-                type="button"
-                onClick={loadMore}
-                className="mx-auto flex items-center justify-center border border-accent/50 px-4 py-3 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-accent transition-colors hover:bg-accent/10"
-              >
-                Broadcast_More_Intel
-              </button>
-            )}
+            <div ref={sentinelRef} className="flex items-center justify-center py-4">
+              {hasMore && (
+                <Loader2 className="animate-spin text-accent/50" size={20} />
+              )}
+            </div>
           </div>
         </div>
 

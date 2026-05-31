@@ -1,11 +1,17 @@
 export const SITE_MAX_WIDTH_CLASS = "max-w-[1400px]";
 
 export const NEWS_PAGE_SIZE = 12;
-export const MAX_NEWS_ITEMS = 60;
+export const MAX_NEWS_ITEMS = 80;
 
 export const RSS_SOURCES = [
-  { name: "SECURITY_WEEK", url: "https://feeds.feedburner.com/securityweek" },
-  { name: "DARK_READING", url: "https://www.darkreading.com/rss.xml" },
+  { name: "SECURITY_WEEK",     url: "https://feeds.feedburner.com/securityweek" },
+  { name: "DARK_READING",      url: "https://www.darkreading.com/rss.xml" },
+  { name: "KREBS_ON_SECURITY", url: "https://krebsonsecurity.com/feed/" },
+  { name: "THE_HACKER_NEWS",   url: "https://thehackernews.com/feeds/posts/default" },
+  { name: "BLEEPING_COMPUTER", url: "https://www.bleepingcomputer.com/feed/" },
+  { name: "CISA_ADVISORIES",   url: "https://www.cisa.gov/cybersecurity-advisories/all.xml" },
+  { name: "SCHNEIER_SEC",      url: "https://www.schneier.com/blog/atom.xml" },
+  { name: "SECURITY_AFFAIRS",  url: "https://securityaffairs.com/feed" },
 ] as const;
 
 export type Project = {
