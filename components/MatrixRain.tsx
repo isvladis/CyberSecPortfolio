@@ -2,15 +2,11 @@
 
 import { useEffect, useRef } from "react";
 
-interface MatrixRainProps {
-  color?: string;
-}
-
 const CHARS = "0101010101010101ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 const FONT_SIZE = 16;
 const FRAME_INTERVAL_MS = 42;
 
-export const MatrixRain = ({ color = "#00FF41" }: MatrixRainProps) => {
+export const MatrixRain = ({ color = "#00FF41" }: { color?: string }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const colorRef = useRef(color);
 
@@ -23,15 +19,12 @@ export const MatrixRain = ({ color = "#00FF41" }: MatrixRainProps) => {
     if (!canvas) return;
 
     const ctx = canvas.getContext("2d");
-    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
-
     if (!ctx) return;
 
     let animationFrame = 0;
     let lastFrame = 0;
     let drops: number[] = [];
     let columns = 0;
-    let isReducedMotion = reducedMotion.matches;
 
     const resizeCanvas = () => {
       const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
@@ -46,8 +39,6 @@ export const MatrixRain = ({ color = "#00FF41" }: MatrixRainProps) => {
     };
 
     const draw = (timestamp: number) => {
-      if (isReducedMotion) return;
-
       if (document.hidden) {
         animationFrame = requestAnimationFrame(draw);
         return;
@@ -77,26 +68,21 @@ export const MatrixRain = ({ color = "#00FF41" }: MatrixRainProps) => {
       animationFrame = requestAnimationFrame(draw);
     };
 
-    const handleMotionChange = (event: MediaQueryListEvent) => {
-      isReducedMotion = event.matches;
-      if (!isReducedMotion) animationFrame = requestAnimationFrame(draw);
-      if (isReducedMotion) {
-        cancelAnimationFrame(animationFrame);
-        ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
-      }
-    };
-
     resizeCanvas();
-    if (!isReducedMotion) animationFrame = requestAnimationFrame(draw);
+    animationFrame = requestAnimationFrame(draw);
     window.addEventListener("resize", resizeCanvas);
-    reducedMotion.addEventListener("change", handleMotionChange);
 
     return () => {
       cancelAnimationFrame(animationFrame);
       window.removeEventListener("resize", resizeCanvas);
-      reducedMotion.removeEventListener("change", handleMotionChange);
     };
   }, []);
 
-  return <canvas ref={canvasRef} className="fixed inset-0 z-0 pointer-events-none opacity-40" aria-hidden="true" />;
+  return (
+    <canvas
+      ref={canvasRef}
+      className="fixed inset-0 z-0 pointer-events-none opacity-40"
+      aria-hidden="true"
+    />
+  );
 };
