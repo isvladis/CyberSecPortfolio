@@ -86,7 +86,7 @@ export const DecryptionTerminal = ({ onSolved, onKeyPress }: DecryptionProps) =>
   };
 
   return (
-    <div className="flex h-[380px] flex-col font-mono text-[11px] text-red-200">
+    <div className="flex h-[280px] flex-col font-mono text-[11px] text-red-200 md:h-[380px]">
       <div className="mb-3 flex items-center justify-between border-b border-accent/30 pb-2 text-accent">
         <div className="flex items-center gap-2">
           <KeyRound size={16} className="animate-pulse" />
@@ -95,7 +95,7 @@ export const DecryptionTerminal = ({ onSolved, onKeyPress }: DecryptionProps) =>
         <span className="rounded border border-accent/50 bg-accent/10 px-2 py-0.5 text-[9px]">PASO {step + 1} / 3</span>
       </div>
 
-      <div ref={scrollRef} className="scrollbar-hide mb-3 flex-1 space-y-1 overflow-y-auto rounded-lg border border-accent/40 bg-black/60 p-4 shadow-inner">
+      <div ref={scrollRef} className="scrollbar-hide mb-3 flex-1 space-y-1 overflow-y-auto rounded-lg border border-accent/40 bg-black/60 p-2 shadow-inner md:p-4">
         {history.map((line, i) => (
           <p key={i} className={line.startsWith(">") ? "font-bold text-white" : "text-accent/80"}>
             {line}

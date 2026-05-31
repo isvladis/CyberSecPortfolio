@@ -40,17 +40,17 @@ export const RansomwareScreen = ({
         aria-modal="true"
         aria-labelledby="ransomware-screen-title"
         tabIndex={-1}
-        className="scrollbar-hide relative max-h-[92vh] w-[92%] max-w-[1200px] overflow-y-auto rounded-sm border-4 border-accent bg-black/95 p-6 shadow-[0_0_60px_var(--color-accent)] md:p-8"
+        className="scrollbar-hide relative max-h-[92vh] w-[92%] max-w-[1200px] overflow-y-auto rounded-sm border-4 border-accent bg-black/95 p-4 shadow-[0_0_60px_var(--color-accent)] md:p-6 lg:p-8"
       >
         <div className="w-full">
-          <div className="mb-6 flex items-center gap-4 border-b-2 border-accent pb-4 text-accent">
-            <ShieldAlert size={48} className="shrink-0 animate-pulse" />
-            <h1 id="ransomware-screen-title" className="text-2xl font-black uppercase leading-tight tracking-normal md:text-4xl">
+          <div className="mb-4 flex items-center gap-2 border-b-2 border-accent pb-3 text-accent md:mb-6 md:gap-4 md:pb-4">
+            <ShieldAlert className="h-8 w-8 shrink-0 animate-pulse md:h-12 md:w-12" />
+            <h1 id="ransomware-screen-title" className="text-base font-black uppercase leading-tight tracking-normal md:text-2xl lg:text-4xl">
               SISTEMA_COMPROMETIDO :: ACCESO_DENEGADO
             </h1>
           </div>
 
-          <p className="mb-6 border border-accent/50 bg-accent/10 p-4 text-xs leading-relaxed text-red-100 md:text-sm">
+          <p className="mb-4 border border-accent/50 bg-accent/10 p-3 text-xs leading-relaxed text-red-100 md:mb-6 md:p-4 md:text-sm">
             Todos los archivos visibles en este servidor han sido cifrados utilizando un algoritmo de grado militar. Sus claves privadas han
             sido enviadas a nuestro servidor de comando y control.
             <br />
@@ -59,16 +59,16 @@ export const RansomwareScreen = ({
             destruidas permanentemente.
           </p>
 
-          <div className="mb-8 grid grid-cols-1 gap-6 border border-accent/50 bg-black p-6 text-center md:grid-cols-2">
+          <div className="mb-6 grid grid-cols-1 gap-4 border border-accent/50 bg-black p-4 text-center md:mb-8 md:grid-cols-2 md:gap-6 md:p-6">
             <div className="flex flex-col items-center gap-2 md:border-r md:border-accent/30 md:pr-6">
-              <Bitcoin size={40} className="text-yellow-500" />
+              <Bitcoin className="h-8 w-8 text-yellow-500 md:h-10 md:w-10" />
               <p className="text-xs uppercase text-accent/80">Dirección Pago</p>
               <p className="break-all rounded bg-white/5 p-2 text-[10px] font-bold">1BTC_TOSHIBABLADE_ENCRYPT123456789ABCDEF</p>
             </div>
             <div className="flex flex-col items-center gap-2">
-              <ShieldAlert size={40} className="text-accent" />
+              <ShieldAlert className="h-8 w-8 text-accent md:h-10 md:w-10" />
               <p className="text-xs uppercase text-accent/80">Cantidad Requerida</p>
-              <p className="text-2xl font-black text-white">0.81 BTC</p>
+              <p className="text-xl font-black text-white md:text-2xl">0.81 BTC</p>
             </div>
           </div>
 
@@ -78,9 +78,10 @@ export const RansomwareScreen = ({
               setShowTerminal(true);
               onKeyPress();
             }}
-            className="mb-4 flex w-full items-center justify-center gap-3 rounded-lg bg-accent p-4 text-lg font-bold uppercase tracking-[0.18em] text-white shadow-lg transition-colors hover:bg-accent-strong active:scale-95"
+            className="mb-4 flex w-full items-center justify-center gap-2 rounded-lg bg-accent p-3 text-sm font-bold uppercase tracking-tight text-white shadow-lg transition-colors hover:bg-accent-strong active:scale-95 md:gap-3 md:p-4 md:text-lg md:tracking-[0.18em]"
           >
-            <TerminalIcon size={24} /> INICIAR_DESCRIPTADO_VIA_TERMINAL
+            <TerminalIcon className="h-5 w-5 shrink-0 md:h-6 md:w-6" />
+            <span className="leading-tight">INICIAR_DESCRIPTADO_VIA_TERMINAL</span>
           </button>
         </div>
 

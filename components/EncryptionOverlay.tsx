@@ -55,7 +55,7 @@ export const EncryptionOverlay = ({ onComplete }: { onComplete: () => void }) =>
         initial={{ scale: 0.92, y: 24 }}
         animate={{ scale: 1, y: 0 }}
         onMouseDown={handlePointerClick}
-        className={`relative w-[92%] max-w-[1100px] rounded-sm border-2 border-accent bg-black/95 p-7 shadow-[0_0_60px_var(--color-accent)] md:p-8 ${
+        className={`relative w-[92%] max-w-[1100px] rounded-sm border-2 border-accent bg-black/95 p-4 shadow-[0_0_60px_var(--color-accent)] md:p-7 lg:p-8 ${
           isClicked ? "cursor-denied-x" : "cursor-corrupt-x"
         }`}
       >
@@ -65,16 +65,16 @@ export const EncryptionOverlay = ({ onComplete }: { onComplete: () => void }) =>
         <div className="absolute bottom-0 right-0 h-3 w-3 border-b-2 border-r-2 border-accent opacity-60" />
 
         <div className="space-y-6 text-center">
-          <h2 id="encryption-overlay-title" className="text-2xl font-black uppercase tracking-normal text-accent animate-pulse md:text-3xl">
+          <h2 id="encryption-overlay-title" className="text-base font-black uppercase tracking-normal text-accent animate-pulse md:text-2xl lg:text-3xl">
             &gt;_ CRITICAL SYSTEM_FAILURE
           </h2>
 
-          <h3 className="text-3xl font-bold uppercase tracking-normal text-white md:text-4xl">CIFRANDO_DATOS_SISTEMA...</h3>
+          <h3 className="text-xl font-bold uppercase tracking-normal text-white md:text-3xl lg:text-4xl">CIFRANDO_DATOS_SISTEMA...</h3>
 
-          <div className="text-4xl font-extrabold uppercase tracking-[0.2em] text-accent md:text-5xl">SYSTEM</div>
+          <div className="text-3xl font-extrabold uppercase tracking-[0.2em] text-accent md:text-4xl lg:text-5xl">SYSTEM</div>
 
           <div className="border border-dashed border-accent/30 p-2">
-            <div className="animate-pulse text-2xl font-semibold tracking-normal text-accent">[ BREACHED ]</div>
+            <div className="animate-pulse text-lg font-semibold tracking-normal text-accent md:text-2xl">[ BREACHED ]</div>
           </div>
 
           <div className="space-y-2 pt-4 text-left">
