@@ -45,7 +45,7 @@ export const NetworkTraffic = ({ isAlertMode }: NetworkTrafficProps) => {
   }, [isAlertMode]);
 
   return (
-    <div className="flex h-full w-full flex-col justify-between">
+    <div className="flex w-full flex-col gap-4">
       <div className="flex h-24 items-end justify-between gap-1 px-2">
         {data.map((value, i) => (
           <div
@@ -58,7 +58,7 @@ export const NetworkTraffic = ({ isAlertMode }: NetworkTrafficProps) => {
         ))}
       </div>
 
-      <div className="mt-4 grid grid-cols-2 gap-2 font-mono text-[9px] uppercase">
+      <div className="grid grid-cols-2 gap-2 font-mono text-[9px] uppercase">
         <div className="flex flex-col">
           <span className="opacity-40">Packets/sec</span>
           <span className={`text-accent ${isAlertMode ? "animate-pulse font-bold" : ""}`}>{packets}</span>
