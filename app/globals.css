@@ -4,23 +4,41 @@
 @source "../components";
 @source "../hooks";
 
+/**
+ * Los valores hex de abajo son un espejo manual de `lib/theme.ts` (THEME_COLORS),
+ * que es la fuente canónica del tema. Cambiar un color aquí obliga a cambiarlo allí.
+ */
 @theme {
   --color-matrix-green: #00ff41;
   --color-matrix-bright: #b6ffd0;
   --color-matrix-dim: #063d17;
   --color-matrix-dark: #000000;
 
-  --color-accent: #00ff41;
-  --color-accent-strong: #00ff41;
+  --color-accent: var(--color-matrix-green);
+  --color-accent-strong: var(--color-matrix-green);
   --color-page-bg: rgb(0 0 0 / 0.8);
 
   --shadow-card-hero: 0 0 25px rgb(0 255 65 / 0.08);
   --shadow-card-soft: 0 0 15px rgb(0 255 65 / 0.12);
   --shadow-card-strong: 0 0 30px rgb(0 255 65 / 0.22);
   --shadow-bar: 0 0 8px var(--color-accent);
+
+  /**
+   * Roles fijos de tipografía (cargadas vía `next/font/google` en `app/layout.tsx`):
+   * `font-mono` (JetBrains Mono) para títulos/menús/badges; `font-sans` (Inter) para párrafos.
+   * El fallback cubre SSR antes de que la variable de next/font se inyecte.
+   */
+  --font-mono: var(--font-jetbrains-mono), "Courier New", Courier, monospace;
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
 }
 
 [data-mode="alert"] {
+  /*
+   * Vuelto al rojo original a pedido explícito (el `#fecaca` más claro, elegido para cumplir
+   * AA en el peor caso del sitio, se veía mal). Con `#ef4444` reaparecen los fallos de
+   * contraste medidos en la auditoría (peor caso ~1.74:1 en algunos textos con opacidad
+   * reducida) — decisión de diseño aceptada conscientemente, no un bug.
+   */
   --color-accent: #ef4444;
   --color-accent-strong: #dc2626;
   --color-page-bg: rgb(127 29 29 / 0.1);
@@ -28,7 +46,7 @@
   --shadow-card-hero: 0 0 25px rgb(255 0 0 / 0.2);
   --shadow-card-soft: 0 0 15px rgb(255 0 0 / 0.3);
   --shadow-card-strong: 0 0 30px red;
-  --shadow-bar: 0 0 8px #ef4444;
+  --shadow-bar: 0 0 8px var(--color-accent);
 }
 
 html,
@@ -39,7 +57,7 @@ body {
 
 body {
   color: var(--color-accent);
-  font-family: "Courier New", Courier, monospace;
+  font-family: var(--font-sans);
   overflow-x: hidden;
 }
 
@@ -65,7 +83,7 @@ body {
 }
 
 .custom-scrollbar::-webkit-scrollbar-track {
-  background: rgba(0, 0, 0, 0.2);
+  background: var(--color-matrix-dim);
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb {

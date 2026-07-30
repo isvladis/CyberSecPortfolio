@@ -3,12 +3,35 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { ExternalLink, Globe, Loader2, X } from "lucide-react";
-import { useDialogFocusTrap } from "@/hooks/useDialogFocusTrap";
-import { useLockBodyScroll } from "@/hooks/useLockBodyScroll";
+import { useOverlayDialog } from "@/hooks/useOverlayDialog";
 import { NEWS_PAGE_SIZE } from "@/lib/constants";
-import type { CyberNewsResponse, NewsItem } from "@/lib/rss";
+import { parseCyberNewsResponse } from "@/lib/rss";
+import type { NewsItem } from "@/lib/rss";
 
-type NewsResponse = Partial<CyberNewsResponse>;
+/**
+ * Un único formateador a nivel de módulo en lugar de `toLocaleString` por noticia en cada render:
+ * construir un `Intl.DateTimeFormat` es la parte cara, y aquí se repetía hasta 80 veces por pasada.
+ * Mismo patrón que `compactNumber` en StackLog.
+ */
+const dateTimeFormat = new Intl.DateTimeFormat("es-ES", {
+  day: "numeric",
+  month: "numeric",
+  year: "numeric",
+  hour: "2-digit",
+  minute: "2-digit",
+});
+
+/**
+ * `Intl.DateTimeFormat.format` LANZA un RangeError con una fecha inválida, donde
+ * `toLocaleString` se limitaba a devolver "Invalid Date". `pubDate` ya se sanea en el servidor,
+ * pero es un string sin validar del otro lado de fetch + JSON.parse: sin esta guarda, un payload
+ * con una fecha corrupta tumbaría el render del feed entero.
+ */
+const formatPublished = (pubDate: string): string => {
+  const date = new Date(pubDate);
+
+  return Number.isNaN(date.getTime()) ? "FECHA_DESCONOCIDA" : dateTimeFormat.format(date);
+};
 
 export const CyberNewsFeed = () => {
   const [items, setItems] = useState<NewsItem[]>([]);
@@ -19,8 +42,6 @@ export const CyberNewsFeed = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [hasError, setHasError] = useState(false);
   const [selectedNews, setSelectedNews] = useState<NewsItem | null>(null);
-  const dialogRef = useRef<HTMLDivElement>(null);
-  const closeButtonRef = useRef<HTMLButtonElement>(null);
   const sentinelRef = useRef<HTMLDivElement>(null);
 
   const visibleItems = items.slice(0, visibleCount);
@@ -35,7 +56,7 @@ export const CyberNewsFeed = () => {
     if (!sentinel || !hasMore) return;
 
     const observer = new IntersectionObserver(
-      (entries) => { if (entries[0].isIntersecting) loadMore(); },
+      (entries) => { if (entries[0]?.isIntersecting) loadMore(); },
       { threshold: 0.1 },
     );
     observer.observe(sentinel);
@@ -45,13 +66,10 @@ export const CyberNewsFeed = () => {
   const openNews = useCallback((item: NewsItem) => setSelectedNews(item), []);
   const closeNews = useCallback(() => setSelectedNews(null), []);
 
-  useLockBodyScroll(Boolean(selectedNews));
-  useDialogFocusTrap({
-    active: Boolean(selectedNews),
-    dialogRef,
-    initialFocusRef: closeButtonRef,
-    onEscape: closeNews,
-  });
+  // Mismo cableado de overlay que usa CvReport (inert + aria-hidden sobre el sitio, lock de scroll,
+  // focus trap y Escape). Antes estaba reimplementado a mano aquí, con el riesgo de que las dos
+  // copias se fueran separando.
+  const { dialogRef, closeButtonRef } = useOverlayDialog(closeNews, Boolean(selectedNews));
 
   useEffect(() => {
     let isMounted = true;
@@ -62,13 +80,13 @@ export const CyberNewsFeed = () => {
         const res = await fetch("/api/cyber-news");
         if (!res.ok) throw new Error("News stream unavailable");
 
-        const data = (await res.json()) as NewsResponse;
+        const data = parseCyberNewsResponse(await res.json());
         if (!isMounted) return;
 
-        setItems(data.items ?? []);
-        setSourceCount(data.sourceCount ?? 0);
-        setFailedSources(data.failedSources ?? 0);
-        setIsDegraded(data.degraded ?? false);
+        setItems(data.items);
+        setSourceCount(data.sourceCount);
+        setFailedSources(data.failedSources);
+        setIsDegraded(data.degraded);
         setHasError(false);
       } catch {
         if (isMounted) {
@@ -93,7 +111,7 @@ export const CyberNewsFeed = () => {
         aria-modal="true"
         aria-labelledby="news-reader-title"
         tabIndex={-1}
-        className="relative flex max-h-[90vh] w-[92vw] max-w-[900px] flex-col overflow-hidden rounded-sm border-2 border-accent/50 bg-[#0a0a0a] shadow-[0_0_50px_rgba(0,0,0,0.9)]"
+        className="relative flex max-h-[90vh] w-[92vw] max-w-[900px] flex-col overflow-hidden rounded-sm border-2 border-accent/50 bg-black/95 shadow-[0_0_50px_rgba(0,0,0,0.9)]"
         onMouseDown={(event) => event.stopPropagation()}
       >
         <div className="flex w-full items-center justify-between gap-4 overflow-hidden border-b-2 border-accent/50 bg-black px-4 py-4 md:px-6">
@@ -120,14 +138,16 @@ export const CyberNewsFeed = () => {
         <div className="custom-scrollbar flex-1 space-y-6 overflow-y-auto bg-black p-6 md:p-8">
           <div className="flex flex-wrap items-center gap-3 font-mono text-[10px] uppercase tracking-[0.16em]">
             <span className="border border-accent bg-accent/20 px-2 py-1 font-bold text-accent">{selectedNews.source}</span>
-            <time className="text-white/70">{new Date(selectedNews.pubDate).toLocaleString("es-ES")}</time>
+            <time dateTime={selectedNews.pubDate} className="text-white/70">
+              {formatPublished(selectedNews.pubDate)}
+            </time>
           </div>
 
-          <h4 className="text-2xl font-black uppercase leading-tight text-white md:text-3xl">{selectedNews.title}</h4>
+          <h4 className="font-mono text-2xl font-black uppercase leading-tight tracking-wide text-white md:text-3xl">
+            {selectedNews.title}
+          </h4>
 
-          <p className="border-l-2 border-accent/50 pl-4 font-mono text-sm leading-7 text-gray-200 md:text-base">
-            {selectedNews.description}
-          </p>
+          <p className="border-l-2 border-accent/50 pl-4 text-sm leading-7 text-gray-200 md:text-base">{selectedNews.description}</p>
         </div>
 
         <div className="flex shrink-0 items-center justify-between border-t border-accent/50 bg-black px-4 py-3 font-mono text-[10px]">
@@ -163,11 +183,23 @@ export const CyberNewsFeed = () => {
           </div>
         </div>
 
-        <div className="custom-scrollbar h-[600px] overflow-y-auto bg-gradient-to-b from-transparent to-black/20 p-6">
-          <div className="space-y-12">
+        {/* `max-h-[70vh]` acota el scroller anidado en pantallas bajas: 600px fijos dejaban el feed
+            ocupando casi todo el viewport de un móvil, sin contexto de página alrededor. */}
+        <div
+          aria-busy={isLoading}
+          className="custom-scrollbar h-[600px] max-h-[70vh] overflow-y-auto bg-gradient-to-b from-transparent to-black/20 p-6"
+        >
+          {/*
+            Región viva permanente para los estados del stream: cargar, fallar o degradarse eran
+            cambios totalmente silenciosos para un lector de pantalla. Tiene que existir en el DOM
+            desde el primer render para que los cambios se anuncien, de ahí que quede fuera del
+            `space-y-12` y se colapse con `empty:hidden` cuando no hay nada que decir (así no mete
+            un hueco extra sobre la primera noticia en el caso normal).
+          */}
+          <div aria-live="polite" className="mb-12 empty:hidden">
             {isLoading && (
               <div className="flex flex-col items-center justify-center gap-3 p-10 text-accent">
-                <Loader2 className="animate-spin" size={28} />
+                <Loader2 className="animate-spin" size={28} aria-hidden="true" />
                 <span className="font-mono text-[10px] uppercase tracking-widest text-accent/70">Synchronizing_Data_Stream...</span>
               </div>
             )}
@@ -180,7 +212,8 @@ export const CyberNewsFeed = () => {
 
             {!isLoading && !hasError && isDegraded && (
               <div className="border border-yellow-500/40 bg-yellow-500/10 p-5 font-mono text-xs leading-relaxed text-yellow-100">
-                STREAM_DEGRADED: {failedSources} de {sourceCount} fuentes no respondieron. Mostrando inteligencia disponible desde los nodos activos.
+                STREAM_DEGRADED: {failedSources} de {sourceCount} fuentes no respondieron. Mostrando inteligencia disponible desde los nodos
+                activos.
               </div>
             )}
 
@@ -189,7 +222,9 @@ export const CyberNewsFeed = () => {
                 STREAM_EMPTY: las fuentes respondieron sin paquetes disponibles.
               </div>
             )}
+          </div>
 
+          <div className="space-y-12">
             {!isLoading &&
               !hasError &&
               visibleItems.map((item, i) => (
@@ -198,19 +233,21 @@ export const CyberNewsFeed = () => {
 
                   <div className="flex flex-col gap-3">
                     <div className="flex flex-wrap items-center gap-3">
-                      <span className="border border-accent bg-accent/20 px-2 py-0.5 text-xs font-bold uppercase tracking-wide text-accent">
+                      <span className="border border-accent bg-accent/20 px-2 py-0.5 font-mono text-xs font-bold uppercase tracking-wide text-accent">
                         {item.source}
                       </span>
-                      <time className="font-mono text-[11px] italic text-white/45">{new Date(item.pubDate).toLocaleString("es-ES")}</time>
+                      <time dateTime={item.pubDate} className="font-mono text-[11px] italic text-white/60">
+                        {formatPublished(item.pubDate)}
+                      </time>
                     </div>
 
                     <button type="button" onClick={() => openNews(item)} className="cursor-pointer text-left transition-transform duration-300 group-hover:translate-x-1">
-                      <h3 className="text-base font-bold uppercase leading-tight tracking-normal text-white transition-colors group-hover:text-accent md:text-lg">
+                      <h3 className="font-mono text-base font-bold uppercase leading-tight tracking-wide text-white transition-colors group-hover:text-accent md:text-lg">
                         {item.title}
                       </h3>
                     </button>
 
-                    <p className="line-clamp-2 max-w-3xl border-l border-white/10 pl-4 font-mono text-xs leading-relaxed text-gray-300 md:text-sm">
+                    <p className="line-clamp-2 max-w-3xl border-l border-white/10 pl-4 text-xs leading-relaxed text-gray-300 md:text-sm">
                       {item.description}
                     </p>
 
@@ -234,8 +271,8 @@ export const CyberNewsFeed = () => {
         </div>
 
         <div className="flex items-center justify-between border-t border-accent/50 bg-black/40 px-4 py-2">
-          <span className="font-mono text-[10px] uppercase tracking-[0.22em] text-white/40">Encrypted_Stream_Active</span>
-          <span className="font-mono text-[10px] uppercase tracking-[0.22em] text-white/40">Total_Packets: {visibleItems.length}</span>
+          <span className="font-mono text-[10px] uppercase tracking-[0.22em] text-white/60">Encrypted_Stream_Active</span>
+          <span className="font-mono text-[10px] uppercase tracking-[0.22em] text-white/60">Total_Packets: {visibleItems.length}</span>
         </div>
       </section>
 

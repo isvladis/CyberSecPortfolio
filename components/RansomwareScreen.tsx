@@ -1,18 +1,20 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import { motion } from "framer-motion";
-import { Bitcoin, ShieldAlert, Terminal as TerminalIcon } from "lucide-react";
+import { Bitcoin, ShieldAlert, Terminal as TerminalIcon, X } from "lucide-react";
 import { DecryptionTerminal } from "@/components/DecryptionTerminal";
 import { useDialogFocusTrap } from "@/hooks/useDialogFocusTrap";
 import { useLockBodyScroll } from "@/hooks/useLockBodyScroll";
 
 export const RansomwareScreen = ({
   onSolved,
+  onAbort,
   onKeyPress,
   stopAlarm,
 }: {
   onSolved: () => void;
+  onAbort: () => void;
   onKeyPress: () => void;
   stopAlarm: () => void;
 }) => {
@@ -20,8 +22,13 @@ export const RansomwareScreen = ({
   const dialogRef = useRef<HTMLDivElement>(null);
   const recoveryButtonRef = useRef<HTMLButtonElement>(null);
 
+  const handleAbort = useCallback(() => {
+    stopAlarm();
+    onAbort();
+  }, [onAbort, stopAlarm]);
+
   useLockBodyScroll();
-  useDialogFocusTrap({ active: true, dialogRef, initialFocusRef: recoveryButtonRef });
+  useDialogFocusTrap({ active: true, dialogRef, initialFocusRef: recoveryButtonRef, onEscape: handleAbort });
 
   const handleTerminalKeyPress = () => {
     stopAlarm();
@@ -82,6 +89,18 @@ export const RansomwareScreen = ({
           >
             <TerminalIcon className="h-5 w-5 shrink-0 md:h-6 md:w-6" />
             <span className="leading-tight">INICIAR_DESCRIPTADO_VIA_TERMINAL</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={handleAbort}
+            aria-label="ABORT_SIMULATION: abortar la simulación y volver al sitio (tecla Escape)"
+            title="Abortar la simulación y volver al sitio (Escape)"
+            className="flex w-full items-center justify-center gap-2 rounded-lg border border-accent/50 bg-black/60 p-3 text-[11px] font-bold uppercase tracking-[0.18em] text-accent transition-colors hover:bg-accent/10 active:scale-95 md:text-xs"
+          >
+            <X className="h-4 w-4 shrink-0" />
+            <span className="leading-tight">ABORT_SIMULATION</span>
+            <span className="opacity-60">[ESC]</span>
           </button>
         </div>
 

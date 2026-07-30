@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { KeyRound } from "lucide-react";
 import { useTerminalSession } from "@/hooks/useTerminalSession";
 
@@ -29,6 +29,8 @@ const CHALLENGES = [
 
 export const DecryptionTerminal = ({ onSolved, onKeyPress }: DecryptionProps) => {
   const [step, setStep] = useState(0);
+  const solveTimeoutRef = useRef<number | null>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
   const { input, setInput, history, setHistory, placeholder, scrollRef } = useTerminalSession({
     initialHistory: [
       "SISTEMA_RECUPERACION_V1.0 // NUCLEO_TOSHIBA",
@@ -41,7 +43,17 @@ export const DecryptionTerminal = ({ onSolved, onKeyPress }: DecryptionProps) =>
     placeholderText: "Introducir comando de recuperación...",
     placeholderMode: "loop",
   });
-  const current = CHALLENGES[step];
+  // step nace en 0 y solo se actualiza vía Math.min(_, CHALLENGES.length - 1) más abajo,
+  // así que siempre es un índice válido dentro de CHALLENGES (array no vacío y constante).
+  const current = CHALLENGES[step]!;
+
+  useEffect(() => {
+    inputRef.current?.focus();
+
+    return () => {
+      if (solveTimeoutRef.current !== null) window.clearTimeout(solveTimeoutRef.current);
+    };
+  }, []);
 
   const handleKeyDown = (event: React.KeyboardEvent) => {
     if (event.key === "Tab") {
@@ -67,11 +79,18 @@ export const DecryptionTerminal = ({ onSolved, onKeyPress }: DecryptionProps) =>
     if (cmdInput === current.full) {
       if (current.res === "SUCCESS") {
         setHistory((prev) => [...prev, `> ${cmdInput}`, "[SYS] RECONSTRUYENDO TABLA DE PARTICIONES...", "[SYS] STATUS: OK. REINICIANDO..."]);
-        window.setTimeout(onSolved, 2000);
+        solveTimeoutRef.current = window.setTimeout(onSolved, 2000);
       } else {
-        const nextChallenge = CHALLENGES[step + 1];
-        setStep((currentStep) => Math.min(currentStep + 1, CHALLENGES.length - 1));
-        setHistory((prev) => [...prev, `> ${cmdInput}`, current.res, "------------------------------------------", `SIGUIENTE FASE: ${nextChallenge.base}`]);
+        const nextStep = Math.min(step + 1, CHALLENGES.length - 1);
+        const nextChallenge = CHALLENGES[nextStep];
+        setStep(nextStep);
+        setHistory((prev) => [
+          ...prev,
+          `> ${cmdInput}`,
+          current.res,
+          "------------------------------------------",
+          nextChallenge ? `SIGUIENTE FASE: ${nextChallenge.base}` : "SIGUIENTE FASE: desconocida",
+        ]);
       }
     } else {
       setHistory((prev) => [
@@ -95,7 +114,15 @@ export const DecryptionTerminal = ({ onSolved, onKeyPress }: DecryptionProps) =>
         <span className="rounded border border-accent/50 bg-accent/10 px-2 py-0.5 text-[9px]">PASO {step + 1} / 3</span>
       </div>
 
-      <div ref={scrollRef} className="scrollbar-hide mb-3 flex-1 space-y-1 overflow-y-auto rounded-lg border border-accent/40 bg-black/60 p-2 shadow-inner md:p-4">
+      {/* Igual que en TerminalConsole: sin `role="log"` + `aria-live` el resultado de cada comando
+          (incluido el que resuelve el puzzle) no se anunciaba de ninguna forma. */}
+      <div
+        ref={scrollRef}
+        role="log"
+        aria-live="polite"
+        aria-label="Salida de la shell de recuperación"
+        className="scrollbar-hide mb-3 flex-1 space-y-1 overflow-y-auto rounded-lg border border-accent/40 bg-black/60 p-2 shadow-inner md:p-4"
+      >
         {history.map((line, i) => (
           <p key={i} className={line.startsWith(">") ? "font-bold text-white" : "text-accent/80"}>
             {line}
@@ -106,6 +133,7 @@ export const DecryptionTerminal = ({ onSolved, onKeyPress }: DecryptionProps) =>
       <div className="flex items-center gap-2 rounded-b-lg border-t border-accent/30 bg-accent/10 px-3 pt-3">
         <span className="animate-pulse text-lg font-bold text-accent">$</span>
         <input
+          ref={inputRef}
           type="text"
           value={input}
           onChange={(event) => {
@@ -114,8 +142,10 @@ export const DecryptionTerminal = ({ onSolved, onKeyPress }: DecryptionProps) =>
           }}
           onKeyDown={handleKeyDown}
           placeholder={placeholder}
-          className="flex-1 border-none bg-transparent font-mono text-sm uppercase text-accent caret-accent outline-none placeholder:text-accent/30 [text-shadow:0_0_8px_var(--color-accent)] focus:ring-0"
-          autoFocus
+          // El placeholder es animado y no sirve como etiqueta accesible: sin `aria-label` este era
+          // un campo sin nombre. El contraste sube de /30 (~2:1) a /60 para cumplir AA.
+          aria-label="Comando de recuperación"
+          className="flex-1 border-none bg-transparent font-mono text-sm uppercase text-accent caret-accent outline-none placeholder:text-accent/60 [text-shadow:0_0_8px_var(--color-accent)] focus:ring-0"
           spellCheck={false}
           autoComplete="off"
         />

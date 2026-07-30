@@ -1,7 +1,8 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Code2, ExternalLink, Lock, Shield } from "lucide-react";
+import { Code2, ExternalLink, Shield } from "lucide-react";
+import { Badge } from "@/components/ui/Badge";
 
 interface ProjectProps {
   title: string;
@@ -14,11 +15,7 @@ interface ProjectProps {
 
 const ProjectLink = ({ href, icon, children }: { href?: string; icon: React.ReactNode; children: React.ReactNode }) => {
   if (!href) {
-    return (
-      <span className="flex cursor-not-allowed items-center gap-1.5 font-mono text-[10px] font-bold uppercase tracking-normal text-white/35">
-        <Lock size={12} /> PRIVATE_LAB
-      </span>
-    );
+    return <Badge variant="private">PRIVATE_LAB</Badge>;
   }
 
   return (
@@ -46,28 +43,21 @@ export const ProjectCard = ({ title, desc, tech, status, repoUrl, demoUrl }: Pro
           <div className="rounded-md bg-accent/10 p-2 text-accent transition-colors duration-300 group-hover:bg-accent group-hover:text-black">
             <Shield size={18} />
           </div>
-          <span
-            className={`rounded border px-2 py-0.5 font-mono text-[9px] tracking-[0.18em] ${
-              status === "Secure" ? "border-accent text-accent" : "border-yellow-500 text-yellow-500 opacity-80"
-            }`}
-          >
+          <Badge variant={status === "Secure" ? "default" : "warning"} className="tracking-[0.18em]">
             {status.toUpperCase()}
-          </span>
+          </Badge>
         </div>
 
-        <h3 className="mb-3 font-mono text-lg font-bold uppercase tracking-normal text-white transition-colors group-hover:text-accent">
+        <h3 className="mb-3 font-mono text-lg font-bold uppercase tracking-wide text-white transition-colors group-hover:text-accent">
           {title}
         </h3>
         <p className="mb-5 text-sm leading-relaxed text-gray-300">{desc}</p>
 
         <div className="mb-6 flex flex-wrap gap-1.5">
           {tech.map((item) => (
-            <span
-              key={item}
-              className="rounded border border-white/10 bg-white/5 px-2 py-0.5 font-mono text-[9px] uppercase text-gray-200 transition-colors group-hover:border-accent/30"
-            >
+            <Badge key={item} variant="neutral" className="transition-colors group-hover:border-accent/30">
               {item}
-            </span>
+            </Badge>
           ))}
         </div>
       </div>

@@ -10,6 +10,7 @@ export type AttackMachine = {
   begin: () => void;
   complete: () => void;
   resolve: () => void;
+  abort: () => void;
 };
 
 export const useAttackMachine = (): AttackMachine => {
@@ -27,11 +28,17 @@ export const useAttackMachine = (): AttackMachine => {
     setPhase((p) => (p === "infected" ? "idle" : p));
   }, []);
 
+  /** Salida de emergencia: cancela la simulación desde cualquier fase (Escape / botón de abortar). */
+  const abort = useCallback(() => {
+    setPhase("idle");
+  }, []);
+
   return {
     phase,
     isAlertMode: phase !== "idle",
     begin,
     complete,
     resolve,
+    abort,
   };
 };

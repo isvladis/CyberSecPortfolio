@@ -57,8 +57,9 @@ export const useDialogFocusTrap = ({
         return;
       }
 
-      const first = focusable[0];
-      const last = focusable[focusable.length - 1];
+      // focusable.length === 0 ya retornó arriba, así que ambos índices existen.
+      const first = focusable[0]!;
+      const last = focusable[focusable.length - 1]!;
 
       if (event.shiftKey && document.activeElement === first) {
         event.preventDefault();

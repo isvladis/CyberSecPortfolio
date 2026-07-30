@@ -1,3 +1,5 @@
+"use client";
+
 import { useCallback, useEffect, useRef } from "react";
 import { BEEP_THROTTLE_MS } from "@/lib/constants";
 

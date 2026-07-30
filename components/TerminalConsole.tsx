@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { TERMINAL_SCAN_INTERVAL_MS, TERMINAL_SCAN_TICKS } from "@/lib/constants";
 import { useTerminalSession } from "@/hooks/useTerminalSession";
 
@@ -30,6 +30,11 @@ const SCAN_PATHS = [
 export const TerminalConsole = ({ onTriggerAlert, onKeyPress }: TerminalProps) => {
   const [isScanning, setIsScanning] = useState(false);
   const [scanText, setScanText] = useState("");
+  // El comando en curso se guarda aparte del input: `handleCommand` vacía el input en el mismo
+  // lote de estado que arranca el escaneo, así que leer `input` durante el escaneo daría "".
+  const [scanCommand, setScanCommand] = useState("");
+  const scanIntervalRef = useRef<number | null>(null);
+  const alertTimeoutRef = useRef<number | null>(null);
   const { input, setInput, history, setHistory, placeholder, scrollRef, inputRef } = useTerminalSession({
     initialHistory: ["SISTEMA_READY > Esperando órdenes..."],
     placeholderText: "Introducir comando...",
@@ -37,12 +42,20 @@ export const TerminalConsole = ({ onTriggerAlert, onKeyPress }: TerminalProps) =
     scrollSignal: `${isScanning}-${scanText}`,
   });
 
+  useEffect(() => {
+    return () => {
+      if (scanIntervalRef.current !== null) window.clearInterval(scanIntervalRef.current);
+      if (alertTimeoutRef.current !== null) window.clearTimeout(alertTimeoutRef.current);
+    };
+  }, []);
+
   const executeWithScan = (cmd: string) => {
     setIsScanning(true);
+    setScanCommand(cmd);
     let count = 0;
     const isHackTriggered = cmd === "override_lock" || cmd === "sudo override_lock";
 
-    const interval = window.setInterval(() => {
+    scanIntervalRef.current = window.setInterval(() => {
       if (isHackTriggered) {
         setScanText(`[CRÍTICO] BRECHA DE SEGURIDAD EN SECTOR 0x${Math.floor(Math.random() * 9999)}...`);
       } else {
@@ -53,13 +66,14 @@ export const TerminalConsole = ({ onTriggerAlert, onKeyPress }: TerminalProps) =
       count += 1;
 
       if (count > TERMINAL_SCAN_TICKS) {
-        window.clearInterval(interval);
+        if (scanIntervalRef.current !== null) window.clearInterval(scanIntervalRef.current);
+        scanIntervalRef.current = null;
         setIsScanning(false);
         setScanText("");
 
         if (isHackTriggered) {
           setHistory((prev) => [...prev, `> ${cmd}`, "ALERTA: intento de brecha detectado. Iniciando protocolo de defensa..."]);
-          window.setTimeout(() => onTriggerAlert?.(), 500);
+          alertTimeoutRef.current = window.setTimeout(() => onTriggerAlert?.(), 500);
         } else if (cmd in COMMANDS) {
           setHistory((prev) => [...prev, `> ${cmd}`, COMMANDS[cmd as keyof typeof COMMANDS]]);
         } else {
@@ -89,20 +103,35 @@ export const TerminalConsole = ({ onTriggerAlert, onKeyPress }: TerminalProps) =
 
   return (
     <div className="flex h-full cursor-text flex-col font-mono text-[11px] leading-relaxed" onClick={() => inputRef.current?.focus()}>
-      <div ref={scrollRef} className="scrollbar-hide mb-2 flex-1 space-y-1 overflow-y-auto pr-2">
+      {/*
+        `role="log"` + `aria-live` hace que la salida de cada comando se anuncie sola: sin esto un
+        lector de pantalla no daba ninguna respuesta al pulsar Enter. Las líneas del escaneo van
+        con `aria-hidden` porque cambian cada 120ms y saturarían el anuncio; el eco del comando y
+        el resultado final (que entra en `history`) sí se leen.
+      */}
+      <div
+        ref={scrollRef}
+        role="log"
+        aria-live="polite"
+        aria-label="Salida de la consola"
+        className="scrollbar-hide mb-2 flex-1 space-y-1 overflow-y-auto pr-2"
+      >
         {history.map((line, i) => (
-          <p key={i} className={line.startsWith(">") ? "font-bold text-white" : "text-accent/80"}>
+          <p key={i} className={line.startsWith(">") ? "font-bold text-matrix-bright" : "text-accent/80"}>
             {line}
           </p>
         ))}
 
         {isScanning && (
           <div className="space-y-1">
-            <p className="font-bold text-white">{`> ${input}`}</p>
-            <p className={scanText.includes("[CRÍTICO]") ? "animate-pulse font-bold text-accent" : "animate-pulse text-yellow-500"}>
+            <p className="font-bold text-matrix-bright">{`> ${scanCommand}`}</p>
+            <p
+              aria-hidden="true"
+              className={scanText.includes("[CRÍTICO]") ? "animate-pulse font-bold text-accent" : "animate-pulse text-yellow-500"}
+            >
               {scanText}
             </p>
-            <p className="text-[9px] text-accent/50">
+            <p aria-hidden="true" className="text-[9px] text-accent/70">
               {scanText.includes("[CRÍTICO]") ? "Bloqueando puertos de red..." : "Accediendo a sectores de memoria de Toshiba..."}
             </p>
           </div>
@@ -121,9 +150,12 @@ export const TerminalConsole = ({ onTriggerAlert, onKeyPress }: TerminalProps) =
           }}
           onKeyDown={handleCommand}
           placeholder={isScanning ? "SISTEMA OCUPADO..." : placeholder}
+          // El placeholder es animado, así que no vale como nombre accesible del campo.
+          aria-label="Comando de la consola interactiva"
           disabled={isScanning}
           className="w-full flex-1 border-none bg-transparent font-mono uppercase text-accent outline-none drop-shadow-[0_0_3px_var(--color-accent)] focus:ring-0 disabled:opacity-50"
           spellCheck={false}
+          autoComplete="off"
         />
       </div>
     </div>

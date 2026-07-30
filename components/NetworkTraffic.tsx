@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { usePrefersReducedMotion } from "@/hooks/usePrefersReducedMotion";
 import {
   NETWORK_ALERT_INTERVAL_MS,
   NETWORK_IDLE_INTERVAL_MS,
@@ -15,10 +16,9 @@ interface NetworkTrafficProps {
 export const NetworkTraffic = ({ isAlertMode }: NetworkTrafficProps) => {
   const [data, setData] = useState<number[]>(Array(NETWORK_SERIES_LENGTH).fill(18));
   const [packets, setPackets] = useState("0");
+  const reducedMotion = usePrefersReducedMotion();
 
   useEffect(() => {
-    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-
     const updateData = () => {
       if (document.hidden) return;
 
@@ -42,11 +42,13 @@ export const NetworkTraffic = ({ isAlertMode }: NetworkTrafficProps) => {
       reducedMotion ? NETWORK_REDUCED_MOTION_INTERVAL_MS : isAlertMode ? NETWORK_ALERT_INTERVAL_MS : NETWORK_IDLE_INTERVAL_MS,
     );
     return () => window.clearInterval(interval);
-  }, [isAlertMode]);
+  }, [isAlertMode, reducedMotion]);
 
   return (
     <div className="flex w-full flex-col gap-4">
-      <div className="flex h-24 items-end justify-between gap-1 px-2">
+      {/* El gráfico es puramente visual y no tiene alternativa textual propia: los dos contadores
+          de abajo ya expresan el mismo dato, así que las barras se ocultan al lector de pantalla. */}
+      <div aria-hidden="true" className="flex h-24 items-end justify-between gap-1 px-2">
         {data.map((value, i) => (
           <div
             key={i}
@@ -60,11 +62,11 @@ export const NetworkTraffic = ({ isAlertMode }: NetworkTrafficProps) => {
 
       <div className="grid grid-cols-2 gap-2 font-mono text-[9px] uppercase">
         <div className="flex flex-col">
-          <span className="opacity-40">Packets/sec</span>
+          <span className="opacity-70">Packets/sec</span>
           <span className={`text-accent ${isAlertMode ? "animate-pulse font-bold" : ""}`}>{packets}</span>
         </div>
         <div className="flex flex-col text-right">
-          <span className="opacity-40">Load Factor</span>
+          <span className="opacity-70">Load Factor</span>
           <span className={`text-accent ${isAlertMode ? "font-bold" : ""}`}>{isAlertMode ? "98.2%" : "12.4%"}</span>
         </div>
       </div>

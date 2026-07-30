@@ -16,28 +16,47 @@ export const EncryptionOverlay = ({ onComplete }: { onComplete: () => void }) =>
   const [progress, setProgress] = useState(0);
   const [isClicked, setIsClicked] = useState(false);
   const dialogRef = useRef<HTMLDivElement>(null);
+  const progressTimerRef = useRef<number | null>(null);
+  const clickTimeoutRef = useRef<number | null>(null);
 
   useLockBodyScroll();
   useDialogFocusTrap({ active: true, dialogRef });
 
+  // El updater se mantiene puro (solo calcula el siguiente progreso). Antes lanzaba el
+  // clearInterval y el setTimeout de `onComplete` desde dentro, y React invoca los updaters dos
+  // veces en StrictMode: eso programaba dos timeouts y perdía la referencia del primero, que ya
+  // no se podía cancelar en el cleanup.
   useEffect(() => {
-    const timer = window.setInterval(() => {
-      setProgress((prev) => {
-        if (prev >= 100) {
-          window.clearInterval(timer);
-          window.setTimeout(onComplete, ENCRYPTION_COMPLETE_DELAY_MS);
-          return 100;
-        }
-        return Math.min(prev + ENCRYPTION_PROGRESS_STEP, 100);
-      });
+    progressTimerRef.current = window.setInterval(() => {
+      setProgress((prev) => Math.min(prev + ENCRYPTION_PROGRESS_STEP, 100));
     }, ENCRYPTION_PROGRESS_INTERVAL_MS);
 
-    return () => window.clearInterval(timer);
-  }, [onComplete]);
+    return () => {
+      if (progressTimerRef.current !== null) window.clearInterval(progressTimerRef.current);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (progress < 100) return;
+
+    if (progressTimerRef.current !== null) {
+      window.clearInterval(progressTimerRef.current);
+      progressTimerRef.current = null;
+    }
+
+    const timeout = window.setTimeout(onComplete, ENCRYPTION_COMPLETE_DELAY_MS);
+    return () => window.clearTimeout(timeout);
+  }, [progress, onComplete]);
+
+  useEffect(() => {
+    return () => {
+      if (clickTimeoutRef.current !== null) window.clearTimeout(clickTimeoutRef.current);
+    };
+  }, []);
 
   const handlePointerClick = () => {
     setIsClicked(true);
-    window.setTimeout(() => setIsClicked(false), 500);
+    clickTimeoutRef.current = window.setTimeout(() => setIsClicked(false), 500);
   };
 
   return (
@@ -83,11 +102,18 @@ export const EncryptionOverlay = ({ onComplete }: { onComplete: () => void }) =>
               <span>{progress}% COMPLETO</span>
             </div>
 
-            <div className="relative h-3 w-full overflow-hidden border border-accent/30 bg-accent/10">
+            <div
+              role="progressbar"
+              aria-valuenow={progress}
+              aria-valuemin={0}
+              aria-valuemax={100}
+              aria-label="Progreso del cifrado simulado"
+              className="relative h-3 w-full overflow-hidden border border-accent/30 bg-accent/10"
+            >
               <motion.div className="h-full bg-accent shadow-[0_0_10px_var(--color-accent)]" style={{ width: `${progress}%` }} />
             </div>
 
-            <div className="pt-1 text-[11px] text-accent opacity-80">
+            <div aria-hidden="true" className="pt-1 text-[11px] text-accent opacity-80">
               &gt; BLOQUES_CORRUPTOS: {Math.floor(progress * CORRUPTED_BLOCK_FACTOR)} / {CORRUPTED_BLOCK_TOTAL}
             </div>
           </div>
