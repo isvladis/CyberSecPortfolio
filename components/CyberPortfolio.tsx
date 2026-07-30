@@ -21,19 +21,6 @@ import { PROJECTS, SITE_MAX_WIDTH_CLASS } from "@/lib/constants";
 import { THEME_COLORS } from "@/lib/theme";
 
 /**
- * Los dos overlays más pesados salen del bundle inicial: ninguno se monta hasta que el usuario hace
- * algo explícito (abrir el dossier / disparar el protocolo de alerta), y entre los dos arrastran
- * todo `lib/cv.ts`, `DecryptionTerminal` y una docena larga de iconos. `ssr: false` porque solo
- * existen tras una interacción: no hay nada que prerenderizar.
- *
- * Las funciones de import se nombran aparte para poder reusarlas como precarga: `dynamic()` no pide
- * el chunk hasta el primer render del componente, así que sin precargar, el overlay aparecería en
- * blanco mientras se descarga. Se disparan en el momento en que se sabe que va a hacer falta —
- * el lapso de "alerting" + `EncryptionOverlay` (que sí va en el bundle principal) da ~3,9s de
- * margen antes del ransomware, y
- * el hover/focus del botón da el suyo antes del dossier.
- */
-/**
  * lucide-react dejó de incluir logos de marca (Github/Linkedin) hace un tiempo — se resuelven
  * como SVG inline propios en vez de depender de un paquete de iconos de marca aparte.
  */
@@ -56,6 +43,18 @@ const HERO_HIGHLIGHTS = [
   "Análisis y respuesta a incidentes",
 ];
 
+/**
+ * Los dos overlays más pesados salen del bundle inicial: ninguno se monta hasta que el usuario hace
+ * algo explícito (abrir el dossier / disparar el protocolo de alerta), y entre los dos arrastran
+ * todo `lib/cv.ts`, `DecryptionTerminal` y una docena larga de iconos. `ssr: false` porque solo
+ * existen tras una interacción: no hay nada que prerenderizar.
+ *
+ * Las funciones de import se nombran aparte para poder reusarlas como precarga: `dynamic()` no pide
+ * el chunk hasta el primer render del componente, así que sin precargar, el overlay aparecería en
+ * blanco mientras se descarga. Se disparan en el momento en que se sabe que va a hacer falta — el
+ * lapso de "alerting" + `EncryptionOverlay` (que sí va en el bundle principal) da ~3,9s de margen
+ * antes del ransomware, y el hover/focus del botón da el suyo antes del dossier.
+ */
 const importCvReport = () => import("@/components/CvReport");
 const importRansomwareScreen = () => import("@/components/RansomwareScreen");
 
@@ -290,7 +289,10 @@ export const CyberPortfolio = () => {
         {isAlertMode ? (
           <span lang="en">CRITICAL WARNING: UNAUTHORIZED ACCESS DETECTED</span>
         ) : (
-          "© 2026 DYSLABS_SEC // TRANSMISIÓN CIFRADA // END_OF_LINE"
+          <>
+            {"© 2026 DYSLABS_SEC // TRANSMISIÓN CIFRADA // "}
+            <span lang="en">END_OF_LINE</span>
+          </>
         )}
       </footer>
     </main>

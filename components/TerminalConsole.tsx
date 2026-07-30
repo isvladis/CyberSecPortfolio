@@ -79,7 +79,6 @@ export const TerminalConsole = ({ onTriggerAlert, onKeyPress }: TerminalProps) =
         } else {
           setHistory((prev) => [...prev, `> ${cmd}`, `ERR: recurso '${cmd}' no encontrado. Escribe "help" para ver comandos.`]);
         }
-
       }
     }, TERMINAL_SCAN_INTERVAL_MS);
   };

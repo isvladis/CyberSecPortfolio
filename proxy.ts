@@ -53,8 +53,9 @@ export const config = {
      *   CSP baseline de `next.config.ts`.
      * - `_next/static`: assets con hash, servidos con cache inmutable.
      * - `favicon.ico`, `robots.txt`, `sitemap.xml`: ficheros estáticos, sin scripts.
-     * (`_next/image` no aparece porque el sitio no usa `next/image`, pero se excluye igual para que
-     * la lista no se quede corta si algún día se usa.)
+     * `_next/image` sí se usa (el logo en `CyberPortfolio` pasa por `next/image`) y también queda
+     * fuera: son assets con hash servidos por el optimizador de imágenes, sin HTML ni scripts
+     * inline que firmar, así que un nonce por request tampoco aportaría nada aquí.
      *
      * El bloque `missing` descarta los prefetch de `next/link`: se responden con el payload RSC,
      * no con HTML, así que no hay scripts inline que firmar y sería un nonce generado para nada.

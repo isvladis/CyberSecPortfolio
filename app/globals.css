@@ -91,11 +91,6 @@ body {
   border-radius: 10px;
 }
 
-#scrollableDiv {
-  scrollbar-width: thin;
-  scrollbar-color: var(--color-accent) transparent;
-}
-
 .scrollbar-hide {
   -ms-overflow-style: none;
   scrollbar-width: none;

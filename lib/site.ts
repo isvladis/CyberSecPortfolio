@@ -28,4 +28,4 @@ export const SITE_URL = configuredSiteUrl ?? "https://site-url-not-configured.in
 export const SITE_NAME = "DYSLABS_SEC";
 
 export const SITE_DESCRIPTION =
-  "Portfolio interactivo de ciberseguridad, hardening, redes privadas, automatizacion y proyectos fullstack.";
+  "Portfolio interactivo de ciberseguridad, hardening, redes privadas, automatización y proyectos fullstack.";

@@ -65,6 +65,14 @@ const toRecord = (value: unknown): Record<string, unknown> | null =>
 const pickField = (record: Record<string, unknown>, keys: readonly string[]): unknown =>
   keys.map((key) => record[key]).find((value) => value !== undefined && value !== null);
 
+/**
+ * Primer valor de la lista que sea un string. El predicado de tipo hace el estrechamiento en el
+ * propio `find`, así que los adaptadores no necesitan una aserción `as string | undefined` para
+ * algo que ya comprobaron en runtime.
+ */
+const pickString = (values: readonly unknown[]): string | undefined =>
+  values.find((value): value is string => typeof value === "string");
+
 /** Entero >= 0, aceptando strings numéricos: varios exporters serializan los contadores como texto. */
 const toCount = (value: unknown): number | null => {
   const parsed = typeof value === "string" && value.trim() !== "" ? Number(value) : value;
@@ -113,12 +121,10 @@ const toStack = (value: unknown): string[] => {
       const record = toRecord(entry);
       if (!record) return "";
 
-      const name = [record.name, record.service, record.title].find((field) => typeof field === "string") as string | undefined;
+      const name = pickString([record.name, record.service, record.title]);
       if (!name) return "";
 
-      const utility = [record.utility, record.role, record.description].find((field) => typeof field === "string") as
-        | string
-        | undefined;
+      const utility = pickString([record.utility, record.role, record.description]);
 
       return utility ? `${name.trim()} · ${utility.trim()}` : name.trim();
     })
@@ -127,7 +133,7 @@ const toStack = (value: unknown): string[] => {
 };
 
 const toSecLevel = (record: Record<string, unknown>): HomelabSecLevel => {
-  const raw = [record.secLevel, record.sec_level].find((field) => typeof field === "string") as string | undefined;
+  const raw = pickString([record.secLevel, record.sec_level]);
   const normalized = raw?.trim().toLowerCase();
 
   return SEC_LEVELS.find((level) => level === normalized) ?? HOMELAB_FALLBACK.secLevel;
@@ -144,7 +150,7 @@ const isContainerRunning = (entry: unknown): boolean => {
   if (!record) return false;
   if (typeof record.running === "boolean") return record.running;
 
-  const state = [record.state, record.status, record.health].find((field) => typeof field === "string") as string | undefined;
+  const state = pickString([record.state, record.status, record.health]);
   if (!state) return true;
 
   const normalized = state.trim().toLowerCase();

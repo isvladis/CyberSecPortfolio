@@ -177,7 +177,7 @@ export const CvReport = ({ onClose }: { onClose: () => void }) => {
               <FileText size={18} aria-hidden="true" />
             </div>
             <h2 id="cv-report-title" className="min-w-0 truncate font-mono text-xs font-bold uppercase tracking-[0.18em] text-accent md:text-sm">
-              <span className="mr-2 hidden opacity-70 sm:inline">[DOSSIER_MODE]:</span>
+              <span lang="en" className="mr-2 hidden opacity-70 sm:inline">[DOSSIER_MODE]:</span>
               OPERADOR_{CV_DATA.codename}
             </h2>
           </div>
