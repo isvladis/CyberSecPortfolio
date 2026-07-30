@@ -29,7 +29,8 @@ import { THEME_COLORS } from "@/lib/theme";
  * Las funciones de import se nombran aparte para poder reusarlas como precarga: `dynamic()` no pide
  * el chunk hasta el primer render del componente, así que sin precargar, el overlay aparecería en
  * blanco mientras se descarga. Se disparan en el momento en que se sabe que va a hacer falta —
- * `EncryptionOverlay` (que sí va en el bundle principal) da ~2,7s de margen antes del ransomware, y
+ * el lapso de "alerting" + `EncryptionOverlay` (que sí va en el bundle principal) da ~3,9s de
+ * margen antes del ransomware, y
  * el hover/focus del botón da el suyo antes del dossier.
  */
 /**
@@ -79,7 +80,10 @@ export const CyberPortfolio = () => {
   }, [begin]);
 
   const mainColor = isAlertMode ? THEME_COLORS.accentAlert : THEME_COLORS.matrixGreen;
-  const hasBlockingOverlay = phase !== "idle";
+  // Distinto de `isAlertMode`: durante la fase "alerting" (ver useAttackMachine) todavía no hay
+  // ningún overlay tapando el contenido, así que no hay que difuminarlo ni sacarlo del árbol de
+  // accesibilidad — eso es justo lo que se quiere que el usuario vea durante ese lapso.
+  const hasBlockingOverlay = phase === "encrypting" || phase === "infected";
 
   return (
     <MotionConfig reducedMotion="user">

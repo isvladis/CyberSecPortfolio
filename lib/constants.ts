@@ -99,6 +99,14 @@ export const HOMELAB_REFRESH_INTERVAL_MS = 60_000;
 export const TERMINAL_SCAN_TICKS = 6;
 export const TERMINAL_SCAN_INTERVAL_MS = 120;
 
+/**
+ * Tiempo que se mantiene visible el modo alerta (StackLog en NODE_UNREACHABLE, MatrixRain y
+ * tokens en rojo, etc.) ANTES de que aparezca `EncryptionOverlay` encima. Antes de este valor
+ * no existía ningún timer para esta transición: `isAlertMode` y la fase "encrypting" se activaban
+ * en el mismo cambio de estado, así que el overlay tapaba el panel de alerta en el mismo frame.
+ */
+export const ALERT_MODE_LEAD_MS = 1200;
+
 export const ENCRYPTION_PROGRESS_STEP = 6;
 export const ENCRYPTION_PROGRESS_INTERVAL_MS = 100;
 export const ENCRYPTION_COMPLETE_DELAY_MS = 1000;
