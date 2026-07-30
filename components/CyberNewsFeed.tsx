@@ -120,7 +120,7 @@ export const CyberNewsFeed = () => {
               <Globe size={18} className="animate-pulse text-accent" />
             </div>
             <h3 id="news-reader-title" className="block w-full truncate font-mono text-xs font-bold uppercase tracking-[0.18em] text-accent md:text-sm">
-              <span className="mr-2 hidden opacity-70 sm:inline">[READER_MODE]:</span>
+              <span lang="en" className="mr-2 hidden opacity-70 sm:inline">[READER_MODE]:</span>
               {selectedNews.title}
             </h3>
           </div>
@@ -131,7 +131,7 @@ export const CyberNewsFeed = () => {
             className="flex shrink-0 items-center gap-2 border border-accent/50 px-3 py-2 font-mono text-[10px] font-bold text-accent transition-colors hover:bg-white/10"
           >
             <X size={16} />
-            <span className="hidden md:inline">TERMINATE_CONNECTION</span>
+            <span lang="en" className="hidden md:inline">TERMINATE_CONNECTION</span>
           </button>
         </div>
 
@@ -151,14 +151,14 @@ export const CyberNewsFeed = () => {
         </div>
 
         <div className="flex shrink-0 items-center justify-between border-t border-accent/50 bg-black px-4 py-3 font-mono text-[10px]">
-          <span className="mr-4 min-w-0 truncate text-white/60">SOURCE_NODE: {selectedNews.source}</span>
+          <span lang="en" className="mr-4 min-w-0 truncate text-white/60">SOURCE_NODE: {selectedNews.source}</span>
           <a
             href={selectedNews.link}
             target="_blank"
             rel="noopener noreferrer"
             className="flex shrink-0 items-center gap-1 text-accent hover:underline"
           >
-            OPEN_ORIGINAL <ExternalLink size={12} />
+            <span lang="en">OPEN_ORIGINAL</span> <ExternalLink size={12} />
           </a>
         </div>
       </div>
@@ -171,12 +171,12 @@ export const CyberNewsFeed = () => {
         <div className="flex items-center justify-between border-b border-accent/50 bg-white/5 px-4 py-3">
           <div className="flex min-w-0 items-center gap-3">
             <Globe size={16} className="shrink-0 animate-pulse text-accent" />
-            <h2 className="truncate text-[10px] font-bold uppercase tracking-[0.24em] text-accent">
+            <h2 lang="en" className="truncate text-[10px] font-bold uppercase tracking-[0.24em] text-accent">
               MultiSource Threat Intelligence Stream
             </h2>
           </div>
           <div className="flex items-center gap-4">
-            <span className="hidden font-mono text-[10px] text-white/55 md:block">
+            <span lang="en" className="hidden font-mono text-[10px] text-white/55 md:block">
               SOURCES: {Math.max(sourceCount - failedSources, 0)} / {sourceCount} ACTIVE_NODES
             </span>
             <div className="h-2 w-2 animate-pulse rounded-full bg-accent shadow-[0_0_8px_currentColor]" />
@@ -200,26 +200,26 @@ export const CyberNewsFeed = () => {
             {isLoading && (
               <div className="flex flex-col items-center justify-center gap-3 p-10 text-accent">
                 <Loader2 className="animate-spin" size={28} aria-hidden="true" />
-                <span className="font-mono text-[10px] uppercase tracking-widest text-accent/70">Synchronizing_Data_Stream...</span>
+                <span lang="en" className="font-mono text-[10px] uppercase tracking-widest text-accent/70">Synchronizing_Data_Stream...</span>
               </div>
             )}
 
             {hasError && (
               <div className="border border-accent/40 bg-accent/10 p-5 font-mono text-xs text-accent">
-                STREAM_ERROR: No se ha podido recuperar la inteligencia de amenazas. Reintenta más tarde.
+                <span lang="en">STREAM_ERROR:</span> No se ha podido recuperar la inteligencia de amenazas. Reintenta más tarde.
               </div>
             )}
 
             {!isLoading && !hasError && isDegraded && (
               <div className="border border-yellow-500/40 bg-yellow-500/10 p-5 font-mono text-xs leading-relaxed text-yellow-100">
-                STREAM_DEGRADED: {failedSources} de {sourceCount} fuentes no respondieron. Mostrando inteligencia disponible desde los nodos
-                activos.
+                <span lang="en">STREAM_DEGRADED:</span> {failedSources} de {sourceCount} fuentes no respondieron. Mostrando inteligencia
+                disponible desde los nodos activos.
               </div>
             )}
 
             {!isLoading && !hasError && items.length === 0 && (
               <div className="border border-accent/40 bg-white/5 p-5 font-mono text-xs text-white/70">
-                STREAM_EMPTY: las fuentes respondieron sin paquetes disponibles.
+                <span lang="en">STREAM_EMPTY:</span> las fuentes respondieron sin paquetes disponibles.
               </div>
             )}
           </div>
@@ -256,7 +256,7 @@ export const CyberNewsFeed = () => {
                       onClick={() => openNews(item)}
                       className="flex cursor-pointer items-center gap-1 self-start font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-accent/75 transition-opacity group-hover:text-accent"
                     >
-                      Access_Safe_Reader <ExternalLink size={10} />
+                      <span lang="en">Access_Safe_Reader</span> <ExternalLink size={10} />
                     </button>
                   </div>
                 </article>
@@ -271,8 +271,8 @@ export const CyberNewsFeed = () => {
         </div>
 
         <div className="flex items-center justify-between border-t border-accent/50 bg-black/40 px-4 py-2">
-          <span className="font-mono text-[10px] uppercase tracking-[0.22em] text-white/60">Encrypted_Stream_Active</span>
-          <span className="font-mono text-[10px] uppercase tracking-[0.22em] text-white/60">Total_Packets: {visibleItems.length}</span>
+          <span lang="en" className="font-mono text-[10px] uppercase tracking-[0.22em] text-white/60">Encrypted_Stream_Active</span>
+          <span lang="en" className="font-mono text-[10px] uppercase tracking-[0.22em] text-white/60">Total_Packets: {visibleItems.length}</span>
         </div>
       </section>
 

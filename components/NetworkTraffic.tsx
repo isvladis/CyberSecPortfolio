@@ -62,11 +62,11 @@ export const NetworkTraffic = ({ isAlertMode }: NetworkTrafficProps) => {
 
       <div className="grid grid-cols-2 gap-2 font-mono text-[9px] uppercase">
         <div className="flex flex-col">
-          <span className="opacity-70">Packets/sec</span>
+          <span lang="en" className="opacity-70">Packets/sec</span>
           <span className={`text-accent ${isAlertMode ? "animate-pulse font-bold" : ""}`}>{packets}</span>
         </div>
         <div className="flex flex-col text-right">
-          <span className="opacity-70">Load Factor</span>
+          <span lang="en" className="opacity-70">Load Factor</span>
           <span className={`text-accent ${isAlertMode ? "font-bold" : ""}`}>{isAlertMode ? "98.2%" : "12.4%"}</span>
         </div>
       </div>

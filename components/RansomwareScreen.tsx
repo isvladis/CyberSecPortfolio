@@ -99,8 +99,8 @@ export const RansomwareScreen = ({
             className="flex w-full items-center justify-center gap-2 rounded-lg border border-accent/50 bg-black/60 p-3 text-[11px] font-bold uppercase tracking-[0.18em] text-accent transition-colors hover:bg-accent/10 active:scale-95 md:text-xs"
           >
             <X className="h-4 w-4 shrink-0" />
-            <span className="leading-tight">ABORT_SIMULATION</span>
-            <span className="opacity-60">[ESC]</span>
+            <span lang="en" className="leading-tight">ABORT_SIMULATION</span>
+            <span lang="en" className="opacity-60">[ESC]</span>
           </button>
         </div>
 

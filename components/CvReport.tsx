@@ -66,7 +66,7 @@ const ExperienceCard = ({ entry }: { entry: Experience }) => (
         <EntryHeader title={entry.role} org={entry.org} meta={`${entry.period} · ${entry.location}`} />
       </div>
       <Badge variant={entry.kind === "technical" ? "default" : "neutral"} className="shrink-0 tracking-[0.16em]">
-        {entry.kind === "technical" ? "TECHNICAL_ROLE" : "SOFT_SKILLS"}
+        <span lang="en">{entry.kind === "technical" ? "TECHNICAL_ROLE" : "SOFT_SKILLS"}</span>
       </Badge>
     </div>
 
@@ -275,7 +275,7 @@ export const CvReport = ({ onClose }: { onClose: () => void }) => {
               variants={sectionVariants}
               className="pb-2 text-center text-[10px] uppercase tracking-[0.24em] text-accent opacity-70"
             >
-              END_OF_DOSSIER // TRANSMISIÓN CIFRADA
+              <span lang="en">END_OF_DOSSIER</span> {"// TRANSMISIÓN CIFRADA"}
             </motion.p>
           </div>
         </div>

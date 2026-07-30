@@ -109,7 +109,7 @@ export const DecryptionTerminal = ({ onSolved, onKeyPress }: DecryptionProps) =>
       <div className="mb-3 flex items-center justify-between border-b border-accent/30 pb-2 text-accent">
         <div className="flex items-center gap-2">
           <KeyRound size={16} className="animate-pulse" />
-          <span className="font-bold uppercase tracking-normal">Emergency Shell v2.1</span>
+          <span lang="en" className="font-bold uppercase tracking-normal">Emergency Shell v2.1</span>
         </div>
         <span className="rounded border border-accent/50 bg-accent/10 px-2 py-0.5 text-[9px]">PASO {step + 1} / 3</span>
       </div>

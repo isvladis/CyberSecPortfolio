@@ -84,16 +84,24 @@ export const EncryptionOverlay = ({ onComplete }: { onComplete: () => void }) =>
         <div className="absolute bottom-0 right-0 h-3 w-3 border-b-2 border-r-2 border-accent opacity-60" />
 
         <div className="space-y-6 text-center">
-          <h2 id="encryption-overlay-title" className="text-base font-black uppercase tracking-normal text-accent animate-pulse md:text-2xl lg:text-3xl">
+          <h2
+            id="encryption-overlay-title"
+            lang="en"
+            className="text-base font-black uppercase tracking-normal text-accent animate-pulse md:text-2xl lg:text-3xl"
+          >
             &gt;_ CRITICAL SYSTEM_FAILURE
           </h2>
 
           <h3 className="text-xl font-bold uppercase tracking-normal text-white md:text-3xl lg:text-4xl">CIFRANDO_DATOS_SISTEMA...</h3>
 
-          <div className="text-3xl font-extrabold uppercase tracking-[0.2em] text-accent md:text-4xl lg:text-5xl">SYSTEM</div>
+          <div lang="en" className="text-3xl font-extrabold uppercase tracking-[0.2em] text-accent md:text-4xl lg:text-5xl">
+            SYSTEM
+          </div>
 
           <div className="border border-dashed border-accent/30 p-2">
-            <div className="animate-pulse text-lg font-semibold tracking-normal text-accent md:text-2xl">[ BREACHED ]</div>
+            <div lang="en" className="animate-pulse text-lg font-semibold tracking-normal text-accent md:text-2xl">
+              [ BREACHED ]
+            </div>
           </div>
 
           <div className="space-y-2 pt-4 text-left">

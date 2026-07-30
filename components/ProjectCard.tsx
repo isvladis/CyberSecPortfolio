@@ -15,7 +15,11 @@ interface ProjectProps {
 
 const ProjectLink = ({ href, icon, children }: { href?: string; icon: React.ReactNode; children: React.ReactNode }) => {
   if (!href) {
-    return <Badge variant="private">PRIVATE_LAB</Badge>;
+    return (
+      <Badge variant="private">
+        <span lang="en">PRIVATE_LAB</span>
+      </Badge>
+    );
   }
 
   return (
@@ -44,7 +48,7 @@ export const ProjectCard = ({ title, desc, tech, status, repoUrl, demoUrl }: Pro
             <Shield size={18} />
           </div>
           <Badge variant={status === "Secure" ? "default" : "warning"} className="tracking-[0.18em]">
-            {status.toUpperCase()}
+            <span lang="en">{status.toUpperCase()}</span>
           </Badge>
         </div>
 
@@ -64,10 +68,10 @@ export const ProjectCard = ({ title, desc, tech, status, repoUrl, demoUrl }: Pro
 
       <div className="mt-auto flex justify-between gap-3 border-t border-white/10 pt-4">
         <ProjectLink href={repoUrl} icon={<Code2 size={12} />}>
-          SOURCE_CODE
+          <span lang="en">SOURCE_CODE</span>
         </ProjectLink>
         <ProjectLink href={demoUrl} icon={<ExternalLink size={12} />}>
-          LIVE_DEMO
+          <span lang="en">LIVE_DEMO</span>
         </ProjectLink>
       </div>
     </motion.article>

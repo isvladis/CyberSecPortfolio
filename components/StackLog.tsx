@@ -56,7 +56,7 @@ export const StackLog = ({ isAlertMode }: StackLogProps) => {
   return (
     <Card className="p-6">
       <Cpu className={`mb-4 text-accent transition-all hover:rotate-12 ${isDegraded ? "opacity-60" : ""}`} size={30} />
-      <h2 className={`mb-3 font-mono text-sm font-bold uppercase tracking-wide ${isAlertMode ? "text-accent" : "text-matrix-bright"}`}>
+      <h2 lang="en" className={`mb-3 font-mono text-sm font-bold uppercase tracking-wide ${isAlertMode ? "text-accent" : "text-matrix-bright"}`}>
         Stack Log
       </h2>
 
@@ -67,7 +67,7 @@ export const StackLog = ({ isAlertMode }: StackLogProps) => {
           // Sin atenuación propia: multiplicada con el `text-accent/70` del contenedor, cualquier
           // `opacity` extra baja esta línea de AA (4.5:1), y aquí también se lee "Node_Link_Down".
           // El pulso ya transmite la espera.
-          <p className={isLoading ? "animate-pulse" : ""}>&gt; {isLoading ? "Sync_Node..." : "Node_Link_Down"}</p>
+          <p lang="en" className={isLoading ? "animate-pulse" : ""}>&gt; {isLoading ? "Sync_Node..." : "Node_Link_Down"}</p>
         )}
       </div>
 
@@ -84,25 +84,41 @@ export const StackLog = ({ isAlertMode }: StackLogProps) => {
                 aria-hidden="true"
                 className={`h-1.5 w-1.5 rounded-full bg-accent ${homelab.status === "active" ? "animate-pulse" : ""}`}
               />
-              {STATUS_LABELS[homelab.status]}
+              <span lang="en">{STATUS_LABELS[homelab.status]}</span>
             </Badge>
-            <Badge variant="neutral">SEC_LEVEL: {homelab.secLevel}</Badge>
+            <Badge variant="neutral">
+              <span lang="en">SEC_LEVEL: {homelab.secLevel}</span>
+            </Badge>
 
             {homelab.metrics && (
               <>
-                <Badge variant="neutral">UPTIME: {formatUptime(homelab.metrics.uptimeSeconds)}</Badge>
                 <Badge variant="neutral">
-                  CONTAINERS: {homelab.metrics.containersUp}/{homelab.metrics.containersTotal}
+                  <span lang="en">UPTIME: {formatUptime(homelab.metrics.uptimeSeconds)}</span>
+                </Badge>
+                <Badge variant="neutral">
+                  <span lang="en">
+                    CONTAINERS: {homelab.metrics.containersUp}/{homelab.metrics.containersTotal}
+                  </span>
                 </Badge>
                 {homelab.metrics.dnsQueriesBlocked !== undefined && (
-                  <Badge variant="neutral">DNS_BLOCKED: {compactNumber.format(homelab.metrics.dnsQueriesBlocked)}</Badge>
+                  <Badge variant="neutral">
+                    <span lang="en">DNS_BLOCKED: {compactNumber.format(homelab.metrics.dnsQueriesBlocked)}</span>
+                  </Badge>
                 )}
               </>
             )}
 
             {/* Solo la clave de la fuente ("pihole"), nunca su URL. */}
-            {homelab.failedSources && <Badge className="border-dashed opacity-70">SRC_DOWN: {homelab.failedSources.join(" ")}</Badge>}
-            {error && <Badge className="border-dashed opacity-70">LINK_STALE</Badge>}
+            {homelab.failedSources && (
+              <Badge className="border-dashed opacity-70">
+                <span lang="en">SRC_DOWN: {homelab.failedSources.join(" ")}</span>
+              </Badge>
+            )}
+            {error && (
+              <Badge className="border-dashed opacity-70">
+                <span lang="en">LINK_STALE</span>
+              </Badge>
+            )}
           </>
         )}
       </div>
